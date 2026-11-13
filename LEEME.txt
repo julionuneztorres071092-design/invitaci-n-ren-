@@ -1,0 +1,11 @@
+INVITACIÓN DIGITAL REN TRANSPORTES 2026
+
+1. Para probarla: abre index.html en un navegador moderno.
+2. Para compartirla por WhatsApp con vista previa, publica la carpeta completa en un hosting estático HTTPS (por ejemplo Netlify Drop o Cloudflare Pages).
+3. En index.html, sustituye el valor de og:image por la URL HTTPS ABSOLUTA de assets/portada-whatsapp.jpg cuando sepas el dominio. WhatsApp necesita una URL pública para mostrar la miniatura.
+4. Se incluyen contadores, enlaces de Google Maps, Google Calendar, Outlook y descarga .ics para Apple Calendar.
+5. La misa no tiene hora de término confirmada. El archivo de calendario usa 7:30 p. m. como estimación técnica, NO como horario anunciado. Ajusta este dato si se confirma.
+6. La música es una melodía instrumental sencilla sintetizada en el navegador (sin derechos de terceros), diferente entre el tramo solemne y el festivo. Solo suena si el visitante la activa.
+7. Las imágenes de los artistas y las imágenes religiosas son recortes de las referencias visuales suministradas. Para una publicación definitiva, sustituir por fotografías originales y logotipos en alta resolución.
+8. Las fechas se interpretan en zona horaria America/Mexico_City (UTC-6).
+9. Sin recopilación de datos, sin formularios y sin dependencias externas de JavaScript.
