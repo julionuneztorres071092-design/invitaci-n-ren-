@@ -62,3 +62,7 @@ reemplázala en todos los lugares donde aparezca. Las horas se interpretan en Am
   partir de un archivo de baja resolución (272×147 px). Sustituirlos por fotografías y logotipos
   originales en alta resolución mejoraría la calidad.
 - Sin formularios, sin recopilación de datos y sin servicios de terceros.
+
+## Música
+
+La música es el archivo `assets/audio/musica.mp3`, proporcionado por el cliente. Para cambiarla, sustituye ese archivo por otro MP3 con el mismo nombre. Solo suena si el visitante elige "Entrar con música" o la activa arriba a la derecha.
