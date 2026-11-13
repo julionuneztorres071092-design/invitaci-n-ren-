@@ -1,11 +1,39 @@
-INVITACIÓN DIGITAL REN TRANSPORTES 2026
+INVITACIÓN DIGITAL · LOGÍSTICA Y TRANSPORTES REN · 2026
 
-1. Para probarla: abre index.html en un navegador moderno.
-2. Para compartirla por WhatsApp con vista previa, publica la carpeta completa en un hosting estático HTTPS (por ejemplo Netlify Drop o Cloudflare Pages).
-3. En index.html, sustituye el valor de og:image por la URL HTTPS ABSOLUTA de assets/portada-whatsapp.jpg cuando sepas el dominio. WhatsApp necesita una URL pública para mostrar la miniatura.
-4. Se incluyen contadores, enlaces de Google Maps, Google Calendar, Outlook y descarga .ics para Apple Calendar.
-5. La misa no tiene hora de término confirmada. El archivo de calendario usa 7:30 p. m. como estimación técnica, NO como horario anunciado. Ajusta este dato si se confirma.
-6. La música es una melodía instrumental sencilla sintetizada en el navegador (sin derechos de terceros), diferente entre el tramo solemne y el festivo. Solo suena si el visitante la activa.
-7. Las imágenes de los artistas y las imágenes religiosas son recortes de las referencias visuales suministradas. Para una publicación definitiva, sustituir por fotografías originales y logotipos en alta resolución.
-8. Las fechas se interpretan en zona horaria America/Mexico_City (UTC-6).
-9. Sin recopilación de datos, sin formularios y sin dependencias externas de JavaScript.
+Qué es: invitación web estática (Misa de acción de gracias, viernes 11 de diciembre, y
+celebración, sábado 12 de diciembre de 2026), lista para compartirse por WhatsApp.
+
+Dirección pública:
+https://julionuneztorres071092-design.github.io/invitaci-n-ren-/
+
+ESTRUCTURA
+- index.html ........ la página completa
+- assets/fonts ...... tipografías (Instrument Serif e Inter)
+- assets/img ........ logo REN, imágenes de la misa, Grupo Contraste, Wall-House y la
+                      portada para WhatsApp (portada-whatsapp.jpg, 1200x630)
+- assets/favicon.svg  icono de la pestaña
+- original/ ......... versión anterior y archivos originales (solo referencia)
+
+VER EN LA COMPUTADORA
+Abrir index.html en el navegador, o en esta carpeta ejecutar:
+  python3 -m http.server 8000
+y abrir http://localhost:8000
+
+PUBLICAR (GitHub Pages)
+1. Subir los cambios a la rama main.
+2. GitHub > Settings > Pages > Deploy from a branch > rama "main", carpeta "/ (root)" > Save.
+3. En el plan gratuito el repositorio debe ser público.
+4. Esperar uno o dos minutos y abrir la dirección pública.
+
+SI CAMBIAN FECHAS, HORAS O DIRECCIONES
+Editar index.html: textos, fechas de los contadores, enlaces de Google Maps y datos del
+calendario (Google, Outlook y .ics). Zona horaria: America/Mexico_City (UTC-6).
+Si cambian las fechas, rehacer también assets/img/portada-whatsapp.jpg.
+
+NOTAS
+- La misa no tiene hora de término confirmada. El calendario usa 7:30 p. m. como
+  estimación técnica, NO como horario anunciado.
+- Las imágenes son recortes de los flyers de referencia suministrados y el logo REN se
+  reconstruyó a partir de un archivo de baja resolución. Sustituirlos por fotografías y
+  logotipos originales en alta resolución mejoraría la calidad.
+- Sin formularios ni recopilación de datos.
