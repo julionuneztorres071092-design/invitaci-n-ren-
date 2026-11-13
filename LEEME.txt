@@ -10,7 +10,9 @@ ESTRUCTURA
 - index.html ........ la página completa
 - assets/fonts ...... tipografías (Instrument Serif e Inter)
 - assets/img ........ logo REN, imágenes de la misa, Grupo Contraste, Wall-House y la
-                      portada para WhatsApp (portada-whatsapp.jpg, 1200x630)
+                      portada para WhatsApp (portada-whatsapp.jpg, 1200x630). Las fotos son
+                      recortes sin texto de los flyers del cliente; los ornamentos (orn-*.svg)
+                      son dibujos vectoriales originales.
 - assets/favicon.svg  icono de la pestaña
 - original/ ......... versión anterior y archivos originales (solo referencia)
 

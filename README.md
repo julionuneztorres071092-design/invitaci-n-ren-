@@ -16,9 +16,12 @@ assets/img/ren-logo.svg    logo REN vectorizado (calcado del original)
 assets/img/ren-logo.png    logo REN 1088×588, fondo transparente
 assets/img/virgen.jpg      recorte de la Virgen de Guadalupe (misa)
 assets/img/jesus.jpg       recorte de Jesús (misa)
-assets/img/grupo-contraste.jpg  panorámica de Grupo Contraste
+assets/img/grupo-contraste.jpg  panorámica de Grupo Contraste (grupo-contraste-m.jpg: recorte 4:3 para móvil)
+assets/img/orn-*.svg       ornamentos originales de trazo fino (rayos, rosa, estrella, filete)
 assets/img/wall-house.png  logo de DJ Wall-House sobre negro
 assets/img/portada-whatsapp.jpg  miniatura para WhatsApp / redes (1200×630)
+                           Las fotos son recortes sin texto de los flyers del cliente (original/referencias/);
+                           los ornamentos son trabajo vectorial original.
 original/                  versión 1 y archivos originales, solo como referencia
 docs/PLAN.md               plan de diseño
 ```
