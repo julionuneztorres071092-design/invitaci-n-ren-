@@ -1,0 +1,41 @@
+INVITACIÓN DIGITAL · LOGÍSTICA Y TRANSPORTES REN · 2026
+
+Qué es: invitación web estática (Misa de acción de gracias, viernes 11 de diciembre, y
+celebración, sábado 12 de diciembre de 2026), lista para compartirse por WhatsApp.
+
+Dirección pública:
+https://julionuneztorres071092-design.github.io/invitaci-n-ren-/
+
+ESTRUCTURA
+- index.html ........ la página completa
+- assets/fonts ...... tipografías (Instrument Serif e Inter)
+- assets/img ........ logo REN, imágenes de la misa, Grupo Contraste, Wall-House y la
+                      portada para WhatsApp (portada-whatsapp.jpg, 1200x630). Las fotos son
+                      recortes sin texto de los flyers del cliente; los ornamentos (orn-*.svg)
+                      son dibujos vectoriales originales.
+- assets/favicon.svg  icono de la pestaña
+- original/ ......... versión anterior y archivos originales (solo referencia)
+
+VER EN LA COMPUTADORA
+Abrir index.html en el navegador, o en esta carpeta ejecutar:
+  python3 -m http.server 8000
+y abrir http://localhost:8000
+
+PUBLICAR (GitHub Pages)
+1. Subir los cambios a la rama main.
+2. GitHub > Settings > Pages > Deploy from a branch > rama "main", carpeta "/ (root)" > Save.
+3. En el plan gratuito el repositorio debe ser público.
+4. Esperar uno o dos minutos y abrir la dirección pública.
+
+SI CAMBIAN FECHAS, HORAS O DIRECCIONES
+Editar index.html: textos, fechas de los contadores, enlaces de Google Maps y datos del
+calendario (Google, Outlook y .ics). Zona horaria: America/Mexico_City (UTC-6).
+Si cambian las fechas, rehacer también assets/img/portada-whatsapp.jpg.
+
+NOTAS
+- La misa no tiene hora de término confirmada. El calendario usa 7:30 p. m. como
+  estimación técnica, NO como horario anunciado.
+- Las imágenes son recortes de los flyers de referencia suministrados y el logo REN se
+  reconstruyó a partir de un archivo de baja resolución. Sustituirlos por fotografías y
+  logotipos originales en alta resolución mejoraría la calidad.
+- Sin formularios ni recopilación de datos.
