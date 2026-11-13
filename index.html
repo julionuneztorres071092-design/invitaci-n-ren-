@@ -44,7 +44,7 @@
   --gutter:clamp(20px,5.5vw,72px);
   --max:1240px;
   --bar:56px;
-  --s-section:clamp(88px,15vw,184px);
+  --s-section:clamp(80px,12vw,152px);
 }
 *,*::before,*::after{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-padding-top:var(--bar)}
@@ -54,10 +54,13 @@ img{display:block;max-width:100%;height:auto}
 a{color:inherit}
 button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
 p{margin:0}
-h1,h2,h3{margin:0;font-weight:400}
+h1,h2,h3{margin:0;font-weight:400;text-wrap:balance}
+.lead,.manifesto,.event__lead,.facts dd small{text-wrap:pretty}
 ::selection{background:var(--gold);color:var(--ink)}
 :focus-visible{outline:1px solid var(--gold);outline-offset:4px}
 [tabindex="-1"]:focus{outline:none}
+.nw{white-space:nowrap}
+.coda span{text-wrap:balance}
 .sr{position:absolute!important;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 
 /* ---------- Texture ---------- */
@@ -116,12 +119,12 @@ h1,h2,h3{margin:0;font-weight:400}
 /* ---------- Buttons ---------- */
 .btn{display:flex;align-items:center;justify-content:space-between;gap:18px;min-height:54px;padding:0 20px;border:1px solid var(--line-2);border-radius:2px;font-size:15px;font-weight:500;letter-spacing:.01em;text-decoration:none;color:var(--ivory);text-align:left;transition:background .5s var(--ease),border-color .5s var(--ease),color .5s var(--ease);width:100%}
 .btn svg{flex:none;width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.25;transition:transform .6s var(--ease)}
-.btn:hover{border-color:var(--gold)}
-.btn:hover svg{transform:translateX(3px)}
+@media (hover:hover){.btn:hover{border-color:var(--gold)}
+.btn:hover svg{transform:translateX(3px)}}
 .btn--solid{background:var(--gold);border-color:var(--gold);color:var(--ink)}
-.btn--solid:hover{background:var(--gold-soft);border-color:var(--gold-soft)}
+@media (hover:hover){.btn--solid:hover{background:var(--gold-soft);border-color:var(--gold-soft)}}
 .btn--ghost{border-color:transparent;justify-content:center;color:var(--muted)}
-.btn--ghost:hover{color:var(--ivory);border-color:var(--line)}
+@media (hover:hover){.btn--ghost:hover{color:var(--ivory);border-color:var(--line)}}
 .btn[aria-expanded="true"] svg{transform:rotate(45deg)}
 
 /* ---------- Sections ---------- */
@@ -129,6 +132,8 @@ main{position:relative}
 section{position:relative}
 .rail{display:flex;align-items:center;gap:16px;margin-bottom:clamp(40px,8vw,72px)}
 .rail__num{font-family:var(--serif);font-style:italic;font-size:22px;line-height:1;color:var(--gold);min-width:1ch}
+.star{display:block;width:16px;height:16px}
+.star--sm{width:11px;height:11px;opacity:.8}
 .rail__line{flex:1;height:1px;background:var(--line);transform-origin:left}
 .js .rail__line{transform:scaleX(0);transition:transform 1.4s var(--ease) .1s}
 .js .is-in .rail__line,.js .rail.is-in .rail__line{transform:none}
@@ -149,21 +154,20 @@ section{position:relative}
 .program__n{font-family:var(--serif);font-style:italic;color:var(--gold);font-size:20px}
 .program__t{font-family:var(--serif);font-size:clamp(22px,5.6vw,28px);line-height:1.1}
 .program__d{font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);text-align:right;white-space:nowrap}
-.program a:hover .program__t{color:var(--gold-soft)}
+@media (hover:hover){.program a:hover .program__t{color:var(--gold-soft)}}
 .scroll-cue{display:none;align-items:center;gap:14px;margin-top:auto;padding-top:36px}
 .scroll-cue span:first-child{width:1px;height:40px;background:var(--line);position:relative;overflow:hidden}
 .scroll-cue span:first-child::after{content:"";position:absolute;inset:0;background:var(--gold);transform:translateY(-100%);animation:cue 2.6s var(--ease) infinite}
 @keyframes cue{0%{transform:translateY(-100%)}55%,100%{transform:translateY(100%)}}
 
 /* Gratitude */
-.gratitude{padding-block:var(--s-section)}
+.gratitude{padding-block:var(--s-section) calc(var(--s-section)*.55)}
 .manifesto{font-family:var(--serif);font-size:clamp(31px,8.2vw,72px);line-height:1.12;letter-spacing:-.003em;color:var(--ivory);max-width:17em}
 .manifesto .it{color:var(--gold-soft)}
 .js .manifesto .w{opacity:.2;transition:opacity .7s var(--ease)}
 .js .manifesto .w.on{opacity:1}
-.coda{display:flex;align-items:center;gap:18px;margin-top:clamp(48px,8vw,80px);font-family:var(--serif);font-style:italic;font-size:clamp(22px,5vw,30px);color:var(--gold-soft)}
-.coda::before{content:"";width:40px;height:1px;background:var(--gold);flex:none}
-@media (max-width:759px){.coda{flex-direction:column;align-items:flex-start;gap:20px}}
+.coda{display:flex;align-items:center;gap:clamp(14px,3vw,20px);margin-top:clamp(48px,8vw,80px);font-family:var(--serif);font-style:italic;font-size:clamp(22px,5vw,30px);color:var(--gold-soft)}
+.rosa{flex:none;width:clamp(26px,6vw,32px);height:auto}
 @media (max-width:1023px){.f-facts .facts{margin-top:0;border-top:0}}
 html:not(.js) .sound{visibility:hidden}
 
@@ -179,6 +183,7 @@ html:not(.js) .sound{visibility:hidden}
 .facts dd{margin:0;font-family:var(--serif);font-size:clamp(22px,5.4vw,27px);line-height:1.2;color:var(--ivory)}
 .facts dd small{display:block;margin-top:6px;font-family:var(--sans);font-size:15px;line-height:1.5;color:var(--muted)}
 .count{margin-top:clamp(40px,8vw,56px)}
+.count.is-done .count__head{display:none}
 .count__head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:14px}
 .timer{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
 .timer__u{padding:18px 0 16px;text-align:center}
@@ -186,17 +191,19 @@ html:not(.js) .sound{visibility:hidden}
 .timer__v{display:flex;justify-content:center;font-family:var(--serif);font-size:clamp(40px,11.5vw,64px);line-height:1;color:var(--ivory);font-variant-numeric:tabular-nums lining-nums}
 .timer__v b{font-weight:400;display:inline-block;width:.52em;text-align:center}
 .timer__l{display:block;margin-top:10px;font-size:10.5px;letter-spacing:.18em}
+@media (max-width:399px){.timer__l{font-size:10px;letter-spacing:.1em}}
 .timer__msg{grid-column:1/-1;padding:28px 0 26px;text-align:center}
 .timer__msg strong{display:block;font-family:var(--serif);font-weight:400;font-style:italic;font-size:clamp(36px,9vw,56px);line-height:1.05;color:var(--gold-soft)}
 .timer__msg span{display:block;margin-top:10px}
 .actions{display:grid;gap:12px;margin-top:clamp(32px,6vw,44px)}
-.cal__menu{list-style:none;margin:0;padding:0;border:1px solid var(--line);border-top:0;overflow:hidden}
+.cal{position:relative}
+.cal__menu{list-style:none;margin:0;padding:0;border:1px solid var(--line);overflow:hidden;position:absolute;z-index:5;right:0;top:100%;margin-top:-1px;min-width:100%;width:max-content;background:var(--ink);box-shadow:0 24px 48px -24px rgba(0,0,0,.8)}
 .cal__menu[hidden]{display:none}
-.cal__menu a{display:flex;align-items:center;justify-content:space-between;min-height:52px;padding:0 20px;font-size:15px;text-decoration:none;color:var(--ivory-2);transition:background .4s var(--ease),color .4s}
+.cal__menu a{display:flex;align-items:center;justify-content:space-between;gap:12px;white-space:nowrap;min-height:52px;padding:0 clamp(14px,1.6vw,20px);font-size:15px;text-decoration:none;color:var(--ivory-2);transition:background .4s var(--ease),color .4s}
 .cal__menu li + li a{border-top:1px solid var(--line)}
 .cal__menu a:hover,.cal__menu a:focus-visible{background:var(--ink-2);color:var(--ivory)}
 .cal__menu a:focus-visible{outline-offset:-3px}
-.cal__menu small{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.cal__menu small{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .cal.is-open .cal__menu{animation:drop .5s var(--ease)}
 @keyframes drop{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
 
@@ -219,11 +226,20 @@ figcaption{margin-top:14px}
 .js .arch-wrap::before{opacity:0;transition:opacity 1.6s var(--ease) .6s}
 .js .is-in .arch-wrap::before{opacity:1}
 .arch img{object-position:50% 18%}
+.arch-wrap .frame{z-index:1}
+.diptych figure:nth-child(2){z-index:2}
+.rays{position:absolute;z-index:0;left:50%;top:50%;width:124%;max-width:none;height:auto;transform:translate(-50%,-50%);pointer-events:none;opacity:.5}
+.js .rays{opacity:0;transition:opacity 2s var(--ease) .5s}
+.js .is-in .rays{opacity:.5}
+figcaption{position:relative;z-index:1}
+@media (max-width:759px){.diptych figcaption{letter-spacing:.12em;font-size:11px}}
 
-.pano{margin:clamp(48px,10vw,80px) calc(var(--gutter) * -1) 0}
-.pano .frame{aspect-ratio:16/9}
-.pano img{object-position:50% 30%}
-.pano figcaption{padding-inline:var(--gutter);display:flex;justify-content:space-between;gap:12px}
+.pano{position:relative;margin:clamp(48px,10vw,80px) 0 0}
+.pano::before{content:"";position:absolute;inset:-7px;border:1px solid rgba(201,162,94,.38);border-radius:3px;pointer-events:none}
+.js .pano::before{opacity:0;transition:opacity 1.6s var(--ease) .6s}
+.js .pano.is-in::before{opacity:1}
+.pano .frame{aspect-ratio:830/622;border-radius:2px}
+.pano picture{display:block;width:100%;height:100%}
 
 .lineup{margin-top:clamp(40px,8vw,56px);border-top:1px solid var(--line)}
 .lineup>div{display:grid;grid-template-columns:7.2em 1fr;gap:16px;padding:20px 0;border-bottom:1px solid var(--line);align-items:start}
@@ -239,16 +255,18 @@ figcaption{margin-top:14px}
 .closing .rail{text-align:left}
 .closing__title{font-size:clamp(68px,20vw,200px);line-height:.92}
 .closing .lead{margin:clamp(20px,4vw,30px) auto 0}
-.hosts{margin-top:clamp(56px,10vw,96px)}
+.filete{display:block;width:min(240px,64%);height:auto;margin:clamp(48px,9vw,80px) auto 0}
+.hosts{margin-top:clamp(36px,6vw,56px)}
 .hosts__name{font-family:var(--serif);font-size:clamp(32px,8.4vw,56px);line-height:1.08;margin-top:16px}
 .hosts__org{margin-top:14px;color:var(--muted)}
 .quick{list-style:none;padding:0;margin:clamp(48px,9vw,72px) auto 0;max-width:640px;border-top:1px solid var(--line);text-align:left}
 .quick a{display:grid;grid-template-columns:2em 1fr auto;align-items:center;gap:12px;min-height:60px;border-bottom:1px solid var(--line);text-decoration:none}
-.quick a:hover .program__t{color:var(--gold-soft)}
+@media (hover:hover){.quick a:hover .program__t{color:var(--gold-soft)}}
 .quick svg{width:16px;height:16px;stroke:var(--gold);fill:none;stroke-width:1.25}
 .foot{margin-top:clamp(64px,12vw,112px);display:flex;flex-direction:column;align-items:center;gap:28px}
-.foot .plaque{--lw:clamp(112px,30vw,136px);--pp:18px}
-.foot__row{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 20px}
+.foot .plaque{--lw:clamp(150px,40vw,184px);--pp:clamp(18px,4.6vw,24px)}
+.foot__row{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px 16px}
+@media (min-width:600px){.foot__row{flex-direction:row}}
 
 /* ---------- Motion (JS-gated) ---------- */
 .mask{display:block;overflow:hidden;padding:.06em .06em .14em;margin:-.06em -.06em -.14em}
@@ -260,11 +278,13 @@ figcaption{margin-top:14px}
 
 /* ---------- Desktop ---------- */
 @media (min-width:760px){
+  .pano .frame{aspect-ratio:1676/466}
   .gate__actions{grid-template-columns:1fr 1fr;max-width:460px}
   .actions{grid-template-columns:1fr 1fr;align-items:start}
   .program a,.quick a{min-height:68px}
 }
 @media (min-width:1024px){
+  .rays{width:138%}
   :root{--bar:64px}
   .hero{padding-top:calc(var(--bar) + clamp(32px,5vh,56px))}
   .hero__grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);grid-template-areas:"title logo" "meta prog";column-gap:clamp(48px,7vw,120px);row-gap:clamp(40px,6vh,64px);align-items:end}
@@ -280,14 +300,12 @@ figcaption{margin-top:14px}
   .misa__grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:clamp(48px,7vw,120px);align-items:start;margin-top:clamp(56px,6vw,88px)}
   .misa__grid .diptych{margin-top:0;position:sticky;top:calc(var(--bar) + 40px)}
   .misa__grid .facts{margin-top:0}
-  .fiesta__grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:clamp(48px,7vw,120px);margin-top:clamp(56px,6vw,88px);align-items:end}
-  .fiesta__grid .lineup{align-self:start}.f-facts{align-self:start}
+  .fiesta__grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:clamp(48px,7vw,120px);margin-top:clamp(56px,6vw,88px);align-items:start}
+  .fiesta__grid .lineup{grid-column:1;grid-row:1/4;position:sticky;top:calc(var(--bar) + 40px);background:var(--ink)}
+  .f-facts,.f-count,.f-actions{grid-column:2}
   .f-count .count,.f-actions .actions{margin-top:clamp(40px,4vw,56px)}
   .fiesta__grid .lineup{margin-top:0}
   .fiesta__grid .facts{margin-top:0}
-  .pano{margin-inline:0}
-  .pano .frame{aspect-ratio:2152/640}
-  .pano figcaption{padding-inline:0}
   .event__head{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);column-gap:clamp(48px,7vw,120px);row-gap:28px}
   .event__head>div{grid-column:1/-1;grid-row:1}
   .event__head .event__lead{grid-column:2;grid-row:1;align-self:end;padding-bottom:.9em;max-width:26em}
@@ -303,7 +321,8 @@ figcaption{margin-top:14px}
   .js [data-anim] .mask>span,.js [data-anim] .st,.js .frame img{transform:none!important;opacity:1!important}
   .js .frame{clip-path:none!important}
   .js .rail__line{transform:none!important}
-  .js .manifesto .w,.js .arch-wrap::before{opacity:1!important}
+  .js .manifesto .w,.js .arch-wrap::before,.js .pano::before{opacity:1!important}
+  .js .rays{opacity:.5!important}
   .gate-intro .gate__in>*{opacity:1;transform:none}
   .frame .px{transform:none!important}
   .js .gate{transition:opacity .01s}
@@ -369,7 +388,7 @@ figcaption{margin-top:14px}
     <div class="wrap">
       <div class="rail" data-anim><span class="rail__num" aria-hidden="true">§</span><span class="rail__line"></span><h2 class="label" id="gratitud-t">Gratitud</h2></div>
       <p class="manifesto" id="manifesto">Este año nos puso a prueba y nos encontró unidos. Damos <span class="it">gracias</span> a Dios y a la Virgen de Guadalupe por cada kilómetro recorrido con bien, y a cada colaborador y a su familia por el esfuerzo que hay detrás de cada entrega.</p>
-      <p class="coda" data-anim><span class="st">Antes de celebrar, queremos agradecer.</span></p>
+      <p class="coda" data-anim><img class="rosa st" src="assets/img/orn-rosa.svg" width="64" height="96" alt="" aria-hidden="true"><span class="st">Antes de celebrar, queremos agradecer.</span></p>
     </div>
   </section>
 
@@ -390,11 +409,11 @@ figcaption{margin-top:14px}
       <div class="misa__grid">
         <div class="diptych" data-anim>
           <figure>
-            <div class="arch-wrap"><div class="frame arch"><div class="px" data-px="0.05"><img src="assets/img/virgen.jpg" width="600" height="800" alt="Imagen de la Virgen de Guadalupe" loading="lazy" decoding="async"></div></div></div>
+            <div class="arch-wrap arch-wrap--rays"><img class="rays" src="assets/img/orn-rayos.svg" width="420" height="560" alt="" aria-hidden="true"><div class="frame arch"><div class="px" data-px="0.05"><img src="assets/img/virgen.jpg" width="472" height="630" alt="Imagen de la Virgen de Guadalupe" loading="lazy" decoding="async"></div></div></div>
             <figcaption class="label">Virgen de Guadalupe</figcaption>
           </figure>
           <figure>
-            <div class="arch-wrap"><div class="frame arch" style="--d:.18s"><div class="px" data-px="0.05"><img src="assets/img/jesus.jpg" width="552" height="736" alt="Imagen de Jesús" loading="lazy" decoding="async"></div></div></div>
+            <div class="arch-wrap"><div class="frame arch" style="--d:.18s"><div class="px" data-px="0.05"><img src="assets/img/jesus.jpg" width="464" height="618" alt="Imagen de Jesús" loading="lazy" decoding="async"></div></div></div>
             <figcaption class="label">Jesús</figcaption>
           </figure>
         </div>
@@ -430,7 +449,7 @@ figcaption{margin-top:14px}
       </div>
 
       <figure class="pano" data-anim>
-        <div class="frame"><div class="px" data-px="0.06"><img src="assets/img/grupo-contraste.jpg" width="2152" height="608" alt="Integrantes de Grupo Contraste, La Orquesta de las Estrellas" loading="lazy" decoding="async"></div></div>
+        <div class="frame"><picture><source media="(max-width:759px)" srcset="assets/img/grupo-contraste-m.jpg" width="830" height="622"><img src="assets/img/grupo-contraste.jpg" width="1676" height="466" alt="Integrantes de Grupo Contraste, La Orquesta de las Estrellas" loading="lazy" decoding="async"></picture></div>
       </figure>
 
       <div class="fiesta__grid">
@@ -462,7 +481,7 @@ figcaption{margin-top:14px}
 
   <section class="closing" id="anfitriones" aria-labelledby="cierre-t">
     <div class="wrap">
-      <div class="rail" data-anim><span class="rail__num" aria-hidden="true">—</span><span class="rail__line"></span><span class="label">Cierre</span></div>
+      <div class="rail" data-anim><span class="rail__num" aria-hidden="true"><img class="star" src="assets/img/orn-estrella.svg" width="24" height="24" alt=""></span><span class="rail__line"></span><span class="label">Cierre</span></div>
       <div data-anim>
         <h2 class="display closing__title" id="cierre-t">
           <span class="mask"><span>Te</span></span>
@@ -470,6 +489,7 @@ figcaption{margin-top:14px}
         </h2>
         <p class="lead st">Será un honor recibirte.</p>
       </div>
+      <img class="filete" src="assets/img/orn-filete.svg" width="240" height="16" alt="" aria-hidden="true">
       <div class="hosts" data-anim>
         <p class="label label--gold st">Anfitriones</p>
         <p class="hosts__name st">Eder Javier Pineda Gutiérrez<br><span class="it">y familia</span></p>
@@ -483,7 +503,7 @@ figcaption{margin-top:14px}
       </nav>
       <footer class="foot" data-anim>
         <div class="plaque st"><span class="logo"><img src="assets/img/ren-logo.png" width="1088" height="588" alt="Logística y Transportes REN" loading="lazy" decoding="async"></span></div>
-        <div class="foot__row st"><span class="label">Evento privado · Invitación personal</span><span class="label">REN · MMXXVI</span></div>
+        <div class="foot__row st"><span class="label"><span class="nw">Evento privado ·</span> <span class="nw">Invitación personal</span></span><img class="star star--sm" aria-hidden="true" src="assets/img/orn-estrella.svg" width="24" height="24" alt=""><span class="label">REN · MMXXVI</span></div>
       </footer>
     </div>
   </section>
@@ -519,6 +539,11 @@ function now(){return Date.now()+offset}
 
 /* ---------- Calendar ---------- */
 function icsEscape(s){return s.replace(/\\/g,'\\\\').replace(/,/g,'\\,').replace(/;/g,'\\;').replace(/\n/g,'\\n')}
+function fold(line){ /* RFC 5545: fold lines longer than 75 octets */
+  var out='',cur='',n=0,enc=window.TextEncoder?new TextEncoder():null;
+  Array.from(line).forEach(function(ch){var b=enc?enc.encode(ch).length:1;if(n+b>(out?74:75)){out+=(out?'\r\n ':'')+cur;cur='';n=0}cur+=ch;n+=b});
+  return out?out+'\r\n '+cur:cur;
+}
 function stamp(){return new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'')}
 function downloadIcs(e,key){
   var str=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//REN Transportes//Invitacion 2026//ES','CALSCALE:GREGORIAN','METHOD:PUBLISH',
@@ -527,7 +552,7 @@ function downloadIcs(e,key){
     'DTSTART;TZID=America/Mexico_City:'+e.start,'DTEND;TZID=America/Mexico_City:'+e.end,
     'SUMMARY:'+icsEscape(e.title),'DESCRIPTION:'+icsEscape(e.description),'LOCATION:'+icsEscape(e.location),
     'BEGIN:VALARM','TRIGGER:-PT2H','ACTION:DISPLAY','DESCRIPTION:'+icsEscape(e.title),'END:VALARM',
-    'END:VEVENT','END:VCALENDAR'].join('\r\n');
+    'END:VEVENT','END:VCALENDAR'].map(fold).join('\r\n');
   var blob=new Blob([str],{type:'text/calendar;charset=utf-8'});
   var url=URL.createObjectURL(blob);var a=document.createElement('a');
   a.href=url;a.download='REN-'+key+'-2026.ics';document.body.appendChild(a);a.click();a.remove();
@@ -581,7 +606,7 @@ function tick(){
     var s=Date.parse(c.e.startISO),en=Date.parse(c.e.endISO),day=Date.parse(c.e.dayISO);
     var state=t>=en?'after':(t>=day?'today':'before');
     if(state!==c.state){
-      c.state=state;
+      c.state=state;c.el.classList.toggle('is-done',state!=='before');
       if(state==='before'){buildDigits(c);c.sub.textContent=c.e.short}
       else if(state==='today'){c.timer.innerHTML='<div class="timer__msg"><strong>Hoy es el día</strong><span class="label">'+(t>=s?'Ya comenzó · Te esperamos':'Te esperamos a las '+c.e.when)+'</span></div>';c.sub.textContent='';c.timer.setAttribute('aria-label','Hoy es el día')}
       else {c.timer.innerHTML='<div class="timer__msg"><strong>Gracias por acompañarnos</strong></div>';c.sub.textContent='';c.timer.setAttribute('aria-label','Gracias por acompañarnos')}
@@ -652,7 +677,7 @@ function frame(){
     el.style.transform='translate3d(0,'+(p*k*-100).toFixed(2)+'%,0)';
   }
   var mr=manifesto.getBoundingClientRect();
-  var prog2=(vh*.82-mr.top)/(mr.height+vh*.25);
+  var prog2=(vh*.9-mr.top)/(mr.height+vh*.05);
   var lit=Math.round(Math.max(0,Math.min(1,prog2))*words.length);
   if(lit!==lastLit){for(var w=0;w<words.length;w++)words[w].classList.toggle('on',w<lit);lastLit=lit}
 }
