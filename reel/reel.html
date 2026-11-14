@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<title>Reel · Fiesta REN 2026</title>
+<!-- Reel de 15 s (1080x1920, 30 fps). Toda la animación es función del tiempo: seek(t) dibuja el cuadro t.
+     Abrir con ?play para verlo en tiempo real. render.js captura los cuadros y ffmpeg los une con audio.wav. -->
+<style>
+@font-face{font-family:"Inter";src:url("../assets/fonts/inter-latin-wght-normal.woff2") format("woff2");font-weight:100 900}
+@font-face{font-family:"Instrument Serif";src:url("../assets/fonts/instrument-serif-latin-400-normal.woff2") format("woff2")}
+@font-face{font-family:"Instrument Serif";font-style:italic;src:url("../assets/fonts/instrument-serif-latin-400-italic.woff2") format("woff2")}
+:root{--blue:#0f4984;--blue2:#2675b7;--red:#e81d37;--gold:#e4c16e;--gold2:#c9a25e;--black:#05070c;--white:#fff}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#000;overflow:hidden}
+#stage{position:relative;width:1080px;height:1920px;overflow:hidden;background:var(--black);font-family:"Inter",sans-serif;font-weight:900;text-transform:uppercase;color:#fff;transform-origin:0 0}
+.sc{position:absolute;inset:0;overflow:hidden}
+.in{position:absolute;inset:0}
+.row{position:absolute;left:0;width:1080px;text-align:center;white-space:nowrap;line-height:1}
+.t{display:inline-block;white-space:nowrap;line-height:1;letter-spacing:-.02em;will-change:transform}
+.ch{display:inline-block;white-space:pre}
+.abs{position:absolute}
+.serif{font-family:"Instrument Serif",serif;font-weight:400;text-transform:none;letter-spacing:0}
+.caps{font-weight:700;font-size:44px;letter-spacing:.42em}
+#fx{position:absolute;inset:0;width:1080px;height:1920px;pointer-events:none}
+#s1{background:radial-gradient(120% 70% at 50% 40%,#1a63b0 0%,#0f4984 45%,#082a52 100%)}
+#s2{background:var(--black)}
+#s3{background:linear-gradient(180deg,#f02a44,#d3142c)}
+#s4{background:#fff}
+#s5{background:radial-gradient(90% 60% at 50% 50%,#0d2244 0%,#05070c 70%)}
+#s6{background:radial-gradient(90% 60% at 50% 42%,#ffffff 0%,#f4f1ea 100%)}
+.tile{position:absolute;left:60px;width:960px;border-radius:44px;padding:54px 60px;overflow:hidden;box-shadow:0 30px 60px -24px rgba(5,7,12,.45)}
+.tile .caps{display:block;font-size:36px;margin-bottom:26px}
+.tile .t{letter-spacing:-.03em}
+svg{display:block;overflow:visible}
+svg *{transform-box:fill-box;transform-origin:center}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="sc" id="s0"><div class="in"></div></div>
+  <div class="sc" id="s1"><div class="in"></div></div>
+  <div class="sc" id="s2"><div class="in"></div></div>
+  <div class="sc" id="s3"><div class="in"></div></div>
+  <div class="sc" id="s4"><div class="in"></div></div>
+  <div class="sc" id="s5"><div class="in"></div></div>
+  <div class="sc" id="s6"><div class="in"></div></div>
+  <div class="sc" id="wipes" style="pointer-events:none"></div>
+  <canvas id="fx" width="1080" height="1920"></canvas>
+</div>
+<script>
+const W=1080,H=1920,DUR=15,C={blue:'#0f4984',blue2:'#2675b7',red:'#e81d37',gold:'#e4c16e',gold2:'#c9a25e',black:'#05070c'};
+const $=s=>document.querySelector(s);
+const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
+const E={lin:t=>t,out:t=>1-Math.pow(1-t,4),out2:t=>1-(1-t)*(1-t),in:t=>t*t*t,io:t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2,
+  back:t=>{const c=2.4;return 1+(c+1)*Math.pow(t-1,3)+c*Math.pow(t-1,2)},
+  spring:t=>1-Math.cos(t*Math.PI*3.2)*Math.exp(-t*6)};
+function rng(seed){let a=seed>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+
+/* ---------- Motor de interpolación ---------- */
+const anims=[],hooks=[];
+const DEF={x:0,y:0,s:1,sx:1,sy:1,r:0,o:1,b:0};
+function A(el,keys){ // keys: [t,{props},ease]
+  const ks=[];let cur=Object.assign({},DEF);
+  keys.forEach(k=>{cur=Object.assign({},cur,k[1]);ks.push({t:k[0],p:cur,e:E[k[2]||'out']})});
+  anims.push({el,ks});return el;
+}
+function props(a,t){
+  const ks=a.ks;if(t<=ks[0].t)return ks[0].p;if(t>=ks[ks.length-1].t)return ks[ks.length-1].p;
+  let i=1;while(ks[i].t<t)i++;const k0=ks[i-1],k1=ks[i],u=k1.e((t-k0.t)/(k1.t-k0.t)),o={};
+  for(const n in k1.p){const v0=k0.p[n]===undefined?k1.p[n]:k0.p[n];o[n]=v0+(k1.p[n]-v0)*u}
+  return o;
+}
+function applyAll(t){
+  for(const a of anims){const p=props(a,t),st=a.el.style;
+    st.transform=`translate(${p.x.toFixed(2)}px,${p.y.toFixed(2)}px) rotate(${p.r.toFixed(3)}deg) scale(${(p.s*p.sx).toFixed(4)},${(p.s*p.sy).toFixed(4)})`;
+    st.opacity=clamp(p.o).toFixed(3);
+    st.filter=p.b>.3?`blur(${p.b.toFixed(1)}px)`:'none';
+    if(p.cr!==undefined||p.cl!==undefined)st.clipPath=`inset(-20% ${(p.cr||0).toFixed(2)}% -20% ${(p.cl||0).toFixed(2)}%)`;
+    if(p.ls!==undefined)st.letterSpacing=p.ls.toFixed(3)+'em';
+  }
+  for(const h of hooks)h(t);
+}
+
+/* ---------- Constructores ---------- */
+function div(parent,cls,css,html){const d=document.createElement('div');if(cls)d.className=cls;if(css)d.style.cssText=css;if(html!==undefined)d.innerHTML=html;parent.appendChild(d);return d}
+const fits=[];
+function text(parent,str,top,o={}){ // fila centrada con un span animable
+  const row=div(parent,'row',`top:${top}px`);
+  const s=document.createElement('span');s.className='t'+(o.cls?' '+o.cls:'');s.textContent=str;
+  s.style.cssText=`font-size:${o.size||100}px;color:${o.color||'#fff'};${o.css||''}`;row.appendChild(s);
+  if(o.fit)fits.push([s,o.fit]);return s;
+}
+function split(el){const str=el.textContent;el.textContent='';return [...str].map(c=>{const s=document.createElement('span');s.className='ch';s.textContent=c;el.appendChild(s);return s})}
+const scene=i=>$('#s'+i+' .in');
+const slam=(el,t,d=.24)=>A(el,[[t-.001,{o:0,s:2.3,b:26}],[t,{o:1,s:2.3,b:26}],[t+d,{s:1,b:0},'out']]);
+const hidden=(el,t)=>[[t-.001,{o:0}],[t,{o:1}]];
+
+/* ===== Escena 0 · 0–2 s · SÁBADO 12 DICIEMBRE ===== */
+{const p=scene(0);
+  const glow=div(p,'abs','left:-200px;top:300px;width:1480px;height:1320px;border-radius:50%;background:radial-gradient(closest-side,rgba(38,117,183,.55),transparent)');
+  A(glow,[[0,{o:0,s:.6}],[.6,{o:1,s:1}],[2,{s:1.2}]]);
+  const l1=div(p,'abs','left:190px;top:560px;width:700px;height:5px;background:'+C.gold),l2=div(p,'abs','left:190px;top:1330px;width:700px;height:5px;background:'+C.gold);
+  A(l1,[[0,{sx:0}],[.4,{sx:1}]]);A(l2,[[.1,{sx:0}],[.5,{sx:1}]]);
+  slam(text(p,'Sábado',612,{fit:700}),.02);
+  const n=text(p,'12',742,{size:640,color:C.gold,css:'letter-spacing:-.05em'});
+  A(n,[[.499,{o:0,y:260,s:.5}],[.5,{o:1,y:260,s:.5}],[.82,{y:0,s:1},'back'],[1.5,{s:1}],[1.62,{s:1.08}],[1.9,{s:1},'out2']]);
+  const d=text(p,'Diciembre',1362,{fit:700});const ds=split(d);
+  ds.forEach((c,i)=>A(c,[[1-.001,{o:0,y:90}],[1+i*.018,{o:1,y:90}],[1.2+i*.018,{y:0},'back']]));
+  const tag=div(p,'abs','left:190px;top:1530px;width:700px;height:112px;border-radius:56px;background:'+C.red+';display:flex;align-items:center;justify-content:center;font-size:44px;letter-spacing:.1em','Fiesta de fin de año');
+  A(tag,[[1.499,{o:0,s:1.7,r:-10}],[1.5,{o:1,s:1.7,r:-10}],[1.72,{s:1,r:-3},'back']]);
+  A(p,[[1.5,{x:0,y:0}],[1.54,{x:-14,y:8},'lin'],[1.58,{x:12,y:-6},'lin'],[1.62,{x:-6,y:4},'lin'],[1.68,{x:0,y:0},'lin'],[1.8,{s:1}],[2,{s:1.12},'in']]);
+}
+/* ===== Escena 1 · 2–4 s · ES MOMENTO DE CELEBRAR ===== */
+{const p=scene(1);
+  const ring=div(p,'abs','left:-110px;top:310px;width:1300px;height:1300px;border-radius:50%;border:6px dashed rgba(228,193,110,.55)');
+  hooks.push(t=>{ring.style.transform=`rotate(${(t*38).toFixed(2)}deg)`});
+  const ring2=div(p,'abs','left:90px;top:510px;width:900px;height:900px;border-radius:50%;border:3px solid rgba(255,255,255,.22)');
+  A(ring2,[[2,{s:.4,o:0}],[2.6,{s:1,o:1}],[4,{s:1.25}]]);
+  A(text(p,'Es momento',640,{fit:860}),[[2.02,{x:-1200,o:1}],[2.34,{x:0}]]);
+  A(text(p,'de',800,{size:230,color:C.gold,cls:'serif',css:'font-style:italic'}),[[2.499,{o:0,s:.2,r:-30}],[2.5,{o:1,s:.2,r:-30}],[2.78,{s:1,r:-7},'back']]);
+  const c=text(p,'Celebrar',1040,{fit:1000});split(c).forEach((ch,i)=>A(ch,[[2.999,{o:0,y:340,r:14}],[3+i*.03,{o:1,y:340,r:14}],[3.26+i*.03,{y:0,r:0},'back']]));
+  const bar=div(p,'abs','left:40px;top:1262px;width:1000px;height:28px;border-radius:14px;background:'+C.red+';transform-origin:0 50%');
+  A(bar,[[3.2,{sx:0}],[3.5,{sx:1}]]);
+  A(text(p,'Sábado 12 · Diciembre',1340,{size:46,color:'#fff',css:'font-weight:700;letter-spacing:.3em'}),[[3.4,{o:0,y:30}],[3.65,{o:1,y:0}]]);
+  A(p,[[3.6,{s:1}],[4,{s:1.35},'in']]);
+}
+/* ===== Escena 2 · 4–6 s · GRUPO CONTRASTE ===== */
+{const p=scene(2);
+  const disc=div(p,'abs','left:-760px;top:-340px;width:2600px;height:2600px;border-radius:50%;background:'+C.red);
+  A(disc,[[4,{s:1}],[4.42,{s:.3},'io'],[6,{s:.345},'lin']]);
+  const halo=div(p,'abs','left:40px;top:460px;width:1000px;height:1000px;border-radius:50%;border:4px solid '+C.gold);
+  A(halo,[[4.3,{s:.6,o:0}],[4.7,{s:1,o:.9}],[6,{s:1.12,o:.5},'lin']]);
+  A(text(p,'Música en vivo',500,{cls:'caps',size:44,color:C.gold}),[[4.12,{o:0,ls:1.1}],[4.45,{o:1,ls:.42}]]);
+  slam(text(p,'Grupo',660,{fit:640,css:'text-shadow:10px 10px 0 #05070c'}),4.5);
+  const c=text(p,'Contraste',880,{fit:1010,css:'text-shadow:10px 10px 0 #05070c'});
+  split(c).forEach((ch,i)=>A(ch,[[4.999,{o:0,y:-320,r:-18}],[5+i*.028,{o:1,y:-320,r:-18}],[5.25+i*.028,{y:0,r:0},'back']]));
+  A(text(p,'La Orquesta de las Estrellas',1130,{size:84,color:C.gold,cls:'serif',css:'font-style:italic'}),[[5.48,{cr:100,o:1}],[5.85,{cr:0},'out2']]);
+  const st=[[150,380,90],[870,430,60],[110,1370,70],[900,1330,110],[540,1500,54]];
+  st.forEach(([x,y,z],i)=>{const s=div(p,'abs',`left:${x-z/2}px;top:${y-z/2}px;width:${z}px;height:${z}px`,
+    `<svg viewBox="-12 -12 24 24" width="${z}" height="${z}"><path d="M0-12 2.6-2.6 12 0 2.6 2.6 0 12-2.6 2.6-12 0-2.6-2.6Z" fill="${C.gold}"/></svg>`);
+    A(s,[[5.45+i*.05,{s:0,r:-90}],[5.75+i*.05,{s:1,r:0},'back'],[6,{r:40,s:1.1},'lin']])});
+}
+/* ===== Escena 3 · 6–8 s · DJ WALL-HOUSE ===== */
+{const p=scene(3);
+  const vinyl=div(p,'abs','left:190px;top:1090px;width:700px;height:700px;border-radius:50%;background:repeating-radial-gradient(circle,#05070c 0 14px,#11141c 14px 17px)');
+  div(vinyl,'abs','left:245px;top:245px;width:210px;height:210px;border-radius:50%;background:'+C.gold);
+  div(vinyl,'abs','left:335px;top:335px;width:30px;height:30px;border-radius:50%;background:#05070c');
+  div(vinyl,'abs','left:342px;top:20px;width:16px;height:150px;border-radius:8px;background:rgba(255,255,255,.35)');
+  const vw=div(p,'abs','left:0;top:0;width:1080px;height:1920px');vw.appendChild(vinyl);
+  A(vw,[[6,{y:900}],[6.4,{y:0},'back']]);
+  hooks.push(t=>{vinyl.style.transform=`rotate(${(t*260).toFixed(2)}deg)`});
+  A(text(p,'En cabina',470,{cls:'caps',size:44,color:'#05070c'}),[[6.05,{o:0,ls:1.1}],[6.35,{o:1,ls:.42}]]);
+  A(text(p,'DJ',560,{size:330,color:'#05070c',css:'letter-spacing:-.05em'}),[[6.02,{x:-900}],[6.3,{x:0},'back']]);
+  const wh=text(p,'Wall-House',880,{fit:1000,css:'text-shadow:8px 8px 0 '+C.blue});
+  A(wh,[[6.499,{o:0,x:1200}],[6.5,{o:1,x:1200}],[6.78,{x:0},'back'],[7.5,{s:1}],[7.58,{s:1.06}],[7.75,{s:1},'out2']]);
+  const bars=[];for(let i=0;i<14;i++){const b=div(p,'abs',`left:${28+i*74}px;bottom:0;width:56px;height:560px;border-radius:28px 28px 0 0;background:${i%3===1?C.gold:(i%3===2?'#fff':'#05070c')};transform-origin:50% 100%`);bars.push(b)}
+  hooks.push(t=>{const u=clamp((t-6.15)/.3);bars.forEach((b,i)=>{const beat=Math.abs(Math.sin((t*2+i*.37)*Math.PI)),w=.5+.5*Math.sin(t*9+i*1.9);
+    b.style.transform=`scaleY(${(u*(.12+.5*beat*(0.55+0.45*w))).toFixed(4)})`})});
+}
+/* ===== Escena 4 · 8–10 s · HORA · LUGAR · VESTIMENTA ===== */
+{const p=scene(4);
+  const mk=(top,h,bg,fg,lab,labc)=>{const t=div(p,'tile',`top:${top}px;height:${h}px;background:${bg};color:${fg}`);div(t,'caps',`color:${labc}`,lab);return t};
+  const t1=mk(330,430,'linear-gradient(135deg,#1a63b0,#0f4984)','#fff','Hora',C.gold);
+  const h=document.createElement('span');h.className='t';h.textContent='2:00 PM';h.style.cssText='font-size:230px;letter-spacing:-.04em';t1.appendChild(h);fits.push([h,800]);
+  const t2=mk(800,470,'#05070c','#fff','Lugar',C.gold);
+  const l=document.createElement('span');l.className='t';l.textContent='Jesús Capistrán 94';l.style.fontSize='93px';t2.appendChild(l);fits.push([l,838]);
+  div(t2,'',"margin-top:22px;font-family:'Instrument Serif',serif;font-weight:400;text-transform:none;font-style:italic;font-size:62px;color:"+C.gold,'San Pedro Xalpa · Azcapotzalco');
+  const t3=mk(1310,360,'linear-gradient(135deg,#f0d48c,#c9a25e)','#05070c','Vestimenta','#05070c');
+  const v=document.createElement('span');v.className='t';v.textContent='Casual elegante';v.style.fontSize='104px';t3.appendChild(v);fits.push([v,838]);
+  A(t1,[[8.02,{x:-1200}],[8.32,{x:0},'back'],[9.5,{s:1}],[9.6,{s:1.035}],[9.8,{s:1},'out2']]);
+  A(t2,[[8.5,{x:1200}],[8.8,{x:0},'back'],[9.55,{s:1}],[9.65,{s:1.035}],[9.85,{s:1},'out2']]);
+  A(t3,[[9,{y:900}],[9.3,{y:0},'back'],[9.6,{s:1}],[9.7,{s:1.035}],[9.9,{s:1},'out2']]);
+  const hs=split(h);hs.forEach((c,i)=>A(c,[[8.2,{y:260}],[8.25+i*.03,{y:260}],[8.5+i*.03,{y:0},'back']]));
+  const dot=div(p,'abs','left:60px;top:230px;width:56px;height:56px;border-radius:50%;background:'+C.red);
+  A(dot,[[8.05,{s:0}],[8.3,{s:1},'back']]);
+  A(div(p,'abs','left:140px;top:236px;font-size:44px;letter-spacing:.3em;color:#05070c;white-space:nowrap','Sábado 12 · dic'),[[8.1,{o:0,x:-40}],[8.4,{o:1,x:0}]]);
+  const sweep=div(p,'abs','left:-500px;top:-200px;width:260px;height:2400px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);transform-origin:50% 50%');
+  A(sweep,[[9.45,{x:0,r:18}],[9.95,{x:2000,r:18},'io']]);
+}
+/* ===== Escena 5 · 10–12 s · GRACIAS POR UN GRAN 2026 ===== */
+{const p=scene(5);
+  slam(text(p,'Gracias',560,{fit:900}),10.02);
+  A(text(p,'por un gran',800,{fit:760,color:C.blue2}),[[10.499,{o:0,x:-1100}],[10.5,{o:1,x:-1100}],[10.76,{x:0},'back']]);
+  const y=text(p,'2026',930,{size:560,color:C.gold,cls:'serif',css:'font-style:italic'});
+  A(y,[[10.999,{o:0,s:.15}],[11,{o:1,s:.15}],[11.3,{s:1},'back'],[11.5,{s:1}],[12,{s:1.2},'in']]);
+  hooks.push(t=>{const k=clamp((t-11)/.42),n=2019+Math.round(k*7);if(y.textContent!=n)y.textContent=n});
+  const ln=div(p,'abs','left:240px;top:1500px;width:600px;height:5px;background:'+C.red);
+  A(ln,[[11.1,{sx:0}],[11.45,{sx:1}]]);
+  A(text(p,'Juntos · Fe · Trabajo · Unión',1540,{size:38,color:'#fff',css:'font-weight:700;letter-spacing:.24em'}),[[11.2,{o:0,y:30}],[11.5,{o:1,y:0}]]);
+}
+/* ===== Escena 6 · 12–15 s · Logo y llamada a la acción ===== */
+let LOGO=null;
+function buildFinale(svgText){const p=scene(6);
+  const holder=div(p,'abs','left:110px;top:520px;width:860px;height:418px');holder.innerHTML=svgText;const svg=holder.querySelector('svg');svg.setAttribute('width',860);svg.setAttribute('height',418);
+  A(holder,[[12,{s:1.06}],[15,{s:1},'out2']]);
+  [...svg.querySelectorAll('#reds rect')].forEach((r,i)=>A(r,[[12-.001,{o:0,x:-900}],[12.02+i*.06,{o:1,x:-900}],[12.36+i*.06,{x:0},'back']]));
+  A(svg.querySelector('#mark'),[[12-.001,{o:0,x:-1100}],[12.1,{o:1,x:-1100}],[12.5,{x:0},'out']]);
+  A(svg.querySelector('#E'),[[12.42,{s:0,o:0}],[12.43,{s:0,o:1}],[12.78,{s:1},'back']]);
+  A(svg.querySelector('#N'),[[12.52,{s:0,o:0}],[12.53,{s:0,o:1}],[12.88,{s:1},'back']]);
+  [...svg.querySelectorAll('#word > *')].forEach((l,i)=>A(l,[[12.72+i*.035,{o:0,y:26}],[12.95+i*.035,{o:1,y:0}]]));
+  const ln=div(p,'abs','left:390px;top:1010px;width:300px;height:5px;background:'+C.gold2);A(ln,[[12.95,{sx:0}],[13.3,{sx:1}]]);
+  const te=text(p,'¡Te esperamos!',1060,{fit:860,color:'#05070c'});
+  split(te).forEach((c,i)=>A(c,[[12.999,{o:0,y:150}],[13+i*.022,{o:1,y:150}],[13.24+i*.022,{y:0},'back']]));
+  A(text(p,'Sábado 12 de diciembre · 2:00 PM',1232,{size:42,color:C.blue,css:'font-weight:700;letter-spacing:.14em'}),[[13.25,{o:0,y:24}],[13.5,{o:1,y:0}]]);
+  const cta=div(p,'abs','left:90px;top:1360px;width:900px;height:190px;border-radius:95px;background:linear-gradient(135deg,#1a63b0,#0f4984);box-shadow:0 34px 70px -26px rgba(15,73,132,.75),0 2px 0 rgba(255,255,255,.35) inset;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px');
+  div(cta,'','font-size:30px;letter-spacing:.34em;font-weight:700;color:'+C.gold,'Abre tu invitación');
+  div(cta,'','font-size:44px;font-weight:700;text-transform:none;letter-spacing:0;color:#fff','fiesta2026.transportes-ren.com.mx');
+  A(cta,[[13.499,{o:0,y:260,s:.9}],[13.5,{o:1,y:260,s:.9}],[13.82,{y:0,s:1},'back'],[14,{s:1}],[14.12,{s:1.05}],[14.4,{s:1},'out2'],[14.5,{s:1}],[14.62,{s:1.03}],[14.9,{s:1},'out2']]);
+  A(text(p,'Evento privado · Logística y Transportes REN',1600,{size:28,color:'#05070c',css:'font-weight:600;letter-spacing:.22em;opacity:.6'}),[[13.8,{o:0}],[14.1,{o:.6}]]);
+}
+
+/* ---------- Transiciones ---------- */
+{const w=$('#wipes');
+  // 2 s: tres bandas diagonales
+  [[C.gold,0],[C.red,.05],['#0f4984',.1]].forEach(([c,d],i)=>{const b=div(w,'abs',`left:-700px;top:-400px;width:2480px;height:2720px;background:${c}`);
+    A(b,[[1.74+d,{x:-2700,r:-14}],[1.99,{x:0,r:-14},'out2'],[2.0+(.1-d),{x:0}],[2.3+(.1-d),{x:2700,r:-14},'in']])});
+  // 4 s: círculo rojo que cubre
+  const c4=div(w,'abs','left:-760px;top:-340px;width:2600px;height:2600px;border-radius:50%;background:'+C.red);
+  A(c4,[[3.68,{s:0}],[3.995,{s:1},'in'],[4,{s:1,o:1}],[4.001,{o:0}]]);
+  // 6 s: persianas rojas
+  for(let i=0;i<8;i++){const b=div(w,'abs',`left:0;top:${i*240}px;width:1080px;height:241px;background:${i%2?'#d3142c':'#f02a44'}`);
+    A(b,[[5.74+i*.014,{x:i%2?1100:-1100}],[5.985,{x:0},'out2'],[6,{o:1}],[6.001,{o:0}]])}
+  // 8 s: círculo blanco desde el vinilo
+  const c8=div(w,'abs','left:-760px;top:140px;width:2600px;height:2600px;border-radius:50%;background:#fff');
+  A(c8,[[7.7,{s:0}],[7.995,{s:1.1},'in'],[8,{o:1}],[8.001,{o:0}]]);
+  // 10 s: columnas negras
+  for(let i=0;i<6;i++){const b=div(w,'abs',`left:${i*180}px;top:0;width:181px;height:1920px;background:${C.black};transform-origin:50% ${i%2?100:0}%`);
+    A(b,[[9.72+i*.02,{sy:0}],[9.985,{sy:1},'io'],[10,{o:1}],[10.001,{o:0}]])}
+  // 12 s: destello blanco
+  const c12=div(w,'abs','left:-760px;top:-340px;width:2600px;height:2600px;border-radius:50%;background:#fff');
+  A(c12,[[11.68,{s:0}],[11.995,{s:1},'in'],[12,{o:1}],[12.35,{o:0},'lin']]);
+}
+
+/* ---------- Lienzo: nieve, líneas de velocidad y destellos ---------- */
+const g=$('#fx').getContext('2d');
+const R=rng(20261212);
+const flakes=[...Array(120)].map(()=>{const z=R();return{x:R()*W,y:R()*H,r:2+z*6,v:140+z*330,a:.35+z*.55,p:R()*6.28,s:.6+R()*1.4,d:20+R()*50}});
+const streaks=[...Array(22)].map(()=>({y:R()*H,l:160+R()*520,v:2600+R()*3600,o:R()*4000,w:3+R()*7,c:R()}));
+const rays=[...Array(70)].map(()=>({a:R()*6.283,v:.7+R()*1.6,o:R(),w:2+R()*5,c:R()}));
+const bursts=[[10.0,300,520,1.2],[10.5,800,640,1.1],[11.0,540,430,1.5],[11.25,220,900,1],[11.5,860,980,1.2],[11.75,540,700,1.7],
+              [1.5,540,960,1.3],[5.0,180,560,1],[5.5,900,1300,1.1]].map(([t,x,y,s],i)=>{const r=rng(900+i);
+  return{t,x,y,s,p:[...Array(Math.round(64*s))].map(()=>({a:r()*6.283,v:(300+r()*900)*s,d:.7+r()*.7,w:3+r()*5,c:r()}))}});
+const twinkles=[...Array(26)].map(()=>({x:60+R()*960,y:360+R()*760,p:R()*6.28,s:2+R()*3,z:8+R()*18}));
+function star4(x,y,z,rot){g.save();g.translate(x,y);g.rotate(rot);g.beginPath();for(let i=0;i<8;i++){const rr=i%2?z*.22:z,a=i*Math.PI/4;g.lineTo(Math.cos(a)*rr,Math.sin(a)*rr)}g.closePath();g.fill();g.restore()}
+function drawFX(t){
+  g.clearRect(0,0,W,H);const light=(t>=8&&t<10)||t>=12;
+  // líneas de velocidad (0–4 s)
+  if(t<4.1){g.lineCap='round';for(const s of streaks){const x=((s.o+t*s.v)%(W+1400))-700,al=(t<2?.5:.32);
+    g.strokeStyle=s.c<.4?`rgba(228,193,110,${al})`:(s.c<.7?`rgba(232,29,55,${al})`:`rgba(255,255,255,${al*.8})`);g.lineWidth=s.w;g.beginPath();g.moveTo(x,s.y);g.lineTo(x+s.l,s.y);g.stroke()}}
+  // rayos radiales (10–12 s)
+  if(t>=10&&t<12.05){const acc=1+clamp((t-11)/1)*2.2;g.lineCap='round';for(const r of rays){const k=((r.o+(t-10)*r.v*acc*.9)%1),d0=120+k*k*1500,d1=d0+60+k*380;
+    g.strokeStyle=r.c<.5?`rgba(228,193,110,${.15+k*.6})`:(r.c<.75?`rgba(38,117,183,${.2+k*.6})`:`rgba(255,255,255,${.1+k*.5})`);g.lineWidth=r.w*(.4+k);
+    g.beginPath();g.moveTo(540+Math.cos(r.a)*d0,960+Math.sin(r.a)*d0);g.lineTo(540+Math.cos(r.a)*d1,960+Math.sin(r.a)*d1);g.stroke()}}
+  // destellos dorados tipo fuegos artificiales
+  g.globalCompositeOperation='lighter';g.lineCap='round';
+  for(const b of bursts){const u=t-b.t;if(u<0||u>1.5)continue;
+    if(u<.3){const rr=220*b.s*(.3+u*3),gr=g.createRadialGradient(b.x,b.y,0,b.x,b.y,rr);gr.addColorStop(0,`rgba(255,240,200,${.8*(1-u/.3)})`);gr.addColorStop(1,'rgba(255,240,200,0)');g.fillStyle=gr;g.beginPath();g.arc(b.x,b.y,rr,0,6.283);g.fill()}
+    for(const q of b.p){const k=u/q.d;if(k>=1)continue;const f=(1-Math.exp(-3.2*u))/3.2,f0=(1-Math.exp(-3.2*Math.max(0,u-.05)))/3.2;
+      const x=b.x+Math.cos(q.a)*q.v*f,y=b.y+Math.sin(q.a)*q.v*f+260*u*u,x0=b.x+Math.cos(q.a)*q.v*f0,y0=b.y+Math.sin(q.a)*q.v*f0+260*Math.max(0,u-.05)**2;
+      const al=(1-k)*(1-k)*(.7+.3*Math.sin(q.a*9+u*40));g.strokeStyle=q.c<.6?`rgba(240,205,120,${al})`:(q.c<.85?`rgba(255,245,215,${al})`:`rgba(232,29,55,${al})`);g.lineWidth=q.w*(1-k*.5);
+      g.beginPath();g.moveTo(x0,y0);g.lineTo(x,y);g.stroke()}}
+  g.globalCompositeOperation='source-over';
+  // destellos alrededor del logo (final)
+  if(t>=12.3){g.fillStyle=C.gold2;for(const w of twinkles){const a=Math.max(0,Math.sin(w.p+t*w.s))*clamp((t-12.3)/.5);if(a<.05)continue;g.globalAlpha=a*.9;star4(w.x,w.y,w.z*a,t*.6+w.p)}g.globalAlpha=1}
+  // nieve
+  for(const f of flakes){const y=(f.y+f.v*t)%(H+40)-20,x=((f.x+Math.sin(f.p+t*f.s)*f.d+t*26)%(W+40)+W+40)%(W+40)-20;
+    g.globalAlpha=f.a*(light?.5:1);g.fillStyle=light?C.blue2:'#fff';g.beginPath();g.arc(x,y,f.r,0,6.283);g.fill()}
+  g.globalAlpha=1;
+}
+
+/* ---------- Bucle ---------- */
+const CUTS=[0,2,4,6,8,10,12,15.01];
+function seek(t){
+  t=clamp(t,0,DUR);
+  for(let i=0;i<7;i++)$('#s'+i).style.display=(t>=CUTS[i]&&t<CUTS[i+1])?'block':'none';
+  applyAll(t);drawFX(t);
+}
+window.seek=seek;
+(async()=>{
+  const svgText=await (await fetch('../assets/img/ren-logo-vector.svg')).text();
+  buildFinale(svgText);
+  await document.fonts.load('900 100px Inter');await document.fonts.load('italic 100px "Instrument Serif"');await document.fonts.load('100px "Instrument Serif"');await document.fonts.ready;
+  // ajuste de ancho: todas las escenas visibles para medir
+  document.querySelectorAll('.sc').forEach(s=>s.style.display='block');
+  for(const [el,w] of fits){el.style.fontSize='100px';const r=el.getBoundingClientRect().width;el.style.fontSize=(100*w/r).toFixed(2)+'px'}
+  seek(0);window.ready=true;
+  if(location.search.includes('play')){
+    const k=Math.min(innerWidth/W,innerHeight/H);$('#stage').style.transform=`scale(${k})`;
+    const au=new Audio('audio.wav');let t0=null;
+    const go=()=>{t0=performance.now();au.currentTime=0;au.play().catch(()=>{});requestAnimationFrame(function f(n){const t=(n-t0)/1000;seek(Math.min(t,DUR));if(t<DUR)requestAnimationFrame(f)})};
+    addEventListener('click',go);go();
+  }
+})();
+</script>
+</body>
+</html>
