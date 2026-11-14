@@ -4,7 +4,7 @@ Invitación digital (sitio estático, en español) para la celebración de fin d
 **Logística y Transportes REN**: Misa de acción de gracias (viernes 11 de diciembre de 2026) y
 celebración (sábado 12 de diciembre de 2026). Pensada para compartirse como enlace por WhatsApp.
 
-**URL publicada:** https://julionuneztorres071092-design.github.io/invitaci-n-ren-/
+**URL publicada:** https://fiesta2026.transportes-ren.com.mx/
 
 ## Estructura
 
@@ -66,3 +66,14 @@ reemplázala en todos los lugares donde aparezca. Las horas se interpretan en Am
 ## Música
 
 La música es el archivo `assets/audio/musica.mp3`, proporcionado por el cliente. Para cambiarla, sustituye ese archivo por otro MP3 con el mismo nombre. Solo suena si el visitante elige "Entrar con música" o la activa arriba a la derecha.
+
+## Reel de la fiesta
+
+`reel/fiesta-ren-2026.mp4` es un video vertical de 15 s (1080x1920) para historias y estados. Se genera con:
+
+1. `python3 reel/logo_build.py assets/img/ren-logo-vector.svg` (logo vectorial redibujado).
+2. `python3 reel/audio.py audio.wav` (música original).
+3. `FPS=120 node reel/render.js http://localhost:8765/reel/reel.html cuadros/` sirviendo la carpeta del proyecto por HTTP.
+4. `ffmpeg` une los cuadros (mezclando 4 por cuadro para el desenfoque de movimiento) con el audio.
+
+`reel/reel.html?play` muestra la animación en el navegador.

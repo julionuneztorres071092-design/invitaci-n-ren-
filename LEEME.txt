@@ -4,7 +4,7 @@ Qué es: invitación web estática (Misa de acción de gracias, viernes 11 de di
 celebración, sábado 12 de diciembre de 2026), lista para compartirse por WhatsApp.
 
 Dirección pública:
-https://julionuneztorres071092-design.github.io/invitaci-n-ren-/
+https://fiesta2026.transportes-ren.com.mx/
 
 ESTRUCTURA
 - index.html ........ la página completa
