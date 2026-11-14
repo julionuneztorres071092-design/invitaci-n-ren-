@@ -2,6 +2,7 @@
 <html lang="es"><head><meta charset="utf-8"><title>REN Showreel</title>
 <style>html,body{margin:0;background:#000}canvas{display:block;width:100vw;max-height:100vh}</style></head>
 <body><canvas id="acc" width="1920" height="1080"></canvas>
+<script src="logo.js"></script>
 <script>
 const W=1920,H=1080,DUR=15;
 const BLUE='#1244C8',NAVY='#0A2A7A',RED='#E4202D',WHITE='#FFFFFF',GRAY='#5d6b7c';
@@ -41,34 +42,32 @@ function T(c,s,x,y,size,o={}){
 }
 function measure(c,s,size,o={}){c.font=`${o.italic?'italic ':''}${o.weight||900} ${size}px Inter, sans-serif`;return c.measureText(s).width+(o.ls||0)*(s.length-1)}
 
-/* ---------- LOGO (rehecho en vectores) ---------- */
-const LOGO={
-  stripes:[[10,50,0,'r'],[70,150,0,'b'],[30,70,1,'r'],[90,150,1,'b'],[40,150,2,'b'],[60,150,3,'b'],[40,150,4,'b'],[80,150,5,'b'],[100,150,6,'b']],
-  R:new Path2D('M150 40H250C285 40 305 62 305 92C305 118 290 135 268 142L312 200H250L212 146H205V200H150Z M205 82V104H245C255 104 260 98 260 93C260 88 255 82 245 82Z'),
-  E:new Path2D('M335 40H420V66H365V106H410V132H365V174H420V200H335Z'),
-  N:new Path2D('M445 200V40H475L520 140V40H550V200H520L475 100V200Z')
-};
-function drawLogo(c,cx,cy,s,t,colors){
-  const bl=colors&&colors.blue||BLUE,rd=colors&&colors.red||RED,tx=colors&&colors.text||GRAY;
-  c.save();c.translate(cx-280*s,cy-145*s);c.scale(s,s);
-  LOGO.stripes.forEach(([x0,x1,row,col],i)=>{
-    const p=pr(t,0.04*row+(col==='r'?0.05:0),0.55);if(p<=0)return;
-    c.save();c.globalAlpha=cl(p*2);
-    c.translate(-(1-oe(p))*900,0);
-    c.fillStyle=col==='r'?rd:bl;
-    c.fillRect(x0,40+row*24,x1-x0,16);c.restore();
-  });
-  [['R',0],['E',1],['N',2]].forEach(([k,i])=>{
-    const p=pr(t,.38+i*.12,.6);if(p<=0)return;
-    c.save();c.globalAlpha=cl(p*3);
-    c.translate(0,200);c.scale(1,Math.max(.001,ob(p)));c.translate(0,-200);
-    c.fillStyle=bl;c.fill(LOGO[k],'evenodd');c.restore();
-  });
-  const p=pr(t,1.0,.7);
-  if(p>0){c.save();c.globalAlpha=cl(p*2);
-    const ls=10+60*(1-oe(p));
-    T(c,'TRANSPORTES',350,262,46,{weight:600,fill:tx,ls,align:'center'});
-    c.restore();}
+/* ---------- LOGO (vectorizado del original, ver tools/trace_logo.py) ---------- */
+const LP=LOGO_DATA.parts.map(p=>({...p,path:new Path2D(p.d)}));
+const LRED=LP.filter(p=>p.kind==='red'),LNAVY=LP.filter(p=>p.kind==='navy'),LLIGHT=LP.filter(p=>p.kind==='light').sort((a,b)=>a.x0-b.x0),LGRAY=LP.filter(p=>p.kind==='gray').sort((a,b)=>a.x0-b.x0);
+const LBLOCK=LNAVY.reduce((a,b)=>(b.x1-b.x0)>(a.x1-a.x0)?b:a);
+const LCOUNTER=LNAVY.filter(p=>p!==LBLOCK);
+const LCX=(43+212)/2,LCY=(36+114)/2;
+function drawLogo(c,cx,cy,s,t){
+  const K=LOGO_DATA.cols;
+  c.save();c.translate(cx-LCX*s,cy-LCY*s);c.scale(s,s);
+  // bloque azul marino: barrido de izquierda a derecha (efecto velocidad)
+  const pb=pr(t,.12,.7);
+  if(pb>0){c.save();c.beginPath();c.rect(30,30,(LBLOCK.x1-30+4)*oe(pb),90);c.clip();
+    c.translate(-(1-oe(pb))*40,0);c.fillStyle=K.navy;c.fill(LBLOCK.path,'evenodd');c.restore();}
+  // pastillas rojas
+  LRED.forEach((p,i)=>{const q=pr(t,.02+i*.06,.55);if(q<=0)return;
+    c.save();c.globalAlpha=cl(q*2);c.translate(-(1-oe(q))*110,0);c.fillStyle=K.red;c.fill(p.path,'evenodd');c.restore();});
+  LCOUNTER.forEach(p=>{const q=pr(t,.75,.3);if(q<=0)return;
+    c.save();c.translate((p.x0+p.x1)/2,(p.y0+p.y1)/2);c.scale(ob(q),ob(q));c.translate(-(p.x0+p.x1)/2,-(p.y0+p.y1)/2);
+    c.fillStyle=K.navy;c.fill(p.path,'evenodd');c.restore();});
+  // E y N suben desde la base
+  LLIGHT.forEach((p,i)=>{const q=pr(t,.62+i*.14,.6);if(q<=0)return;
+    c.save();c.globalAlpha=cl(q*3);c.translate(0,p.y1);c.scale(1,Math.max(.001,ob(q)));c.translate(0,-p.y1);
+    c.fillStyle=K.light;c.fill(p.path,'evenodd');c.restore();});
+  // TRANSPORTES letra por letra
+  LGRAY.forEach((p,i)=>{const q=pr(t,1.0+i*.045,.45);if(q<=0)return;
+    c.save();c.globalAlpha=cl(q*2);c.translate(0,(1-oe(q))*10);c.fillStyle=K.gray;c.fill(p.path,'evenodd');c.restore();});
   c.restore();
 }
 
@@ -190,13 +189,7 @@ function S6(c,lt){
     c.beginPath();c.arc(W/2,400,r,0,7);c.stroke();
   }
   c.globalAlpha=1;
-  // barrido de luz
-  const sw=pr(lt,1.6,.7);
-  drawLogo(c,W/2,390,2.0,lt);
-  if(sw>0&&sw<1){
-    c.save();c.globalAlpha=.9;c.fillStyle=RED;const x=-300+(W+600)*io(sw);
-    c.transform(1,0,-.35,1,0,0);c.fillRect(x-30+330,140,10,520);c.fillStyle=BLUE;c.fillRect(x+330,140,40,520);c.restore();
-  }
+  drawLogo(c,W/2,400,6.4,lt);
   const p=pr(lt,1.5,.6),b=ob(p),pulse=1+.025*Math.sin(Math.max(0,lt-2.1)*7);
   c.save();c.translate(W/2,830);c.scale(b*pulse,b*pulse);
   c.fillStyle=RED;const bw=760,bh=130;
